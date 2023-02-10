@@ -35,7 +35,7 @@ class Item(ABC):
         return self.exclude_private(vars)
     
     @abstractmethod
-    def verbose_query_type(self) -> str:
+    def query_type(self, verbose:bool=True) -> str | QueryType:
         """returns the querytiype of the class as a string"""
 
 @dataclass(kw_only=True)
@@ -50,16 +50,17 @@ class Request(Item):
     @threshold.setter
     def threshold(self, threshold: float) -> None:
         self._threshold = threshold
-    def verbose_query_type(self) -> str:
-        return QueryType.REQUESTS.value
-
+    def query_type(self, verbose:bool = True) -> str | QueryType:
+        if verbose:
+            return QueryType.REQUESTS.value
+        return QueryType.REQUESTS
 
 @dataclass(kw_only=True)
 class Result(Item):
     price: float
     _price: float = field(init=False, repr=False)
     sent: bool = False
-    _sent: bool = field(init=False, repr=False, default_factory=bool)
+    _sent: bool = field(init=False, repr=False)
     url: str
     _url: str = field(init=False, repr=False)
 
@@ -87,6 +88,13 @@ class Result(Item):
     def url(self, value: str) -> None:
         self._url = value
     def create_message(self):
-        return Message(msg= f"Preisdrop für *{self.name}*\nGefundener Preis: {self.price}€\n\nDu findest das Angebot hier:\n{self.url}")
-    def verbose_query_type(self) -> str:
-        return QueryType.RESULTS.value
+        return f"Preisdrop für \"{self.name}\"\nGefundener Preis: {self.price}€\n\nDu findest das Angebot hier:\n{self.url}"
+    def query_type(self, verbose:bool = True) -> str | QueryType:
+        if verbose:
+            return QueryType.RESULTS.value
+        return QueryType.RESULTS
+def create_item_from_dict(obj:dict, properties:list[QueryType, Condition]) -> Item:
+    if properties[0] == QueryType.REQUESTS:
+        return Request(name=obj['name'], type=properties[1], threshold=obj['threshold'])
+    if properties[0] == QueryType.RESULTS:
+        return Result(name=obj['name'], type=properties[1], price=obj['price'], sent=(obj['sent']), url=obj['url'])

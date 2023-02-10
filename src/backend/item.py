@@ -1,65 +1,92 @@
-from condition import Condition
+from abc import ABC, abstractmethod
+from dataclasses import dataclass, field, asdict
+from enums import Condition, QueryType
+from message import Message
 
-class Item:
-    def __init__(self, name, type:Condition) -> None:
-        self.name = name
-        self.type = type.value
-
-    def get_name(self) -> str:
-        return self.name
-
-    def get_type(self):
-        return self.type
-
-    def set_name(self, name):
-        self.name = name
-
-    def set_type(self, type):
-        self.type = type
-    def dump(self):
-        return {key:value for key, value in self.__dict__.items() if not key.startswith('__') and not callable(value)}
+@dataclass(kw_only=True)
+class Item(ABC):
+    name: str
+    _name: str = field(init=False, repr=False)
+    type: Condition
+    _type: Condition = field(init=False, repr=False)
 
 
+    @property
+    def name(self) -> str:
+        return self._name
+
+    @property
+    def type(self) -> Condition:
+        return self._type
+
+    @name.setter
+    def name(self, value: str) -> None:
+        self._name = value
+
+    @type.setter
+    def type(self, condition: Condition) -> None:
+        self._type = condition.value
+
+    def exclude_private(self, vars: dict) -> dict:
+        return {key: value for key, value in vars.items() if not key.startswith('_')}
+
+    def dump(self) -> dict:
+        vars = asdict(self)
+        return self.exclude_private(vars)
+    
+    @abstractmethod
+    def verbose_query_type(self) -> str:
+        """returns the querytiype of the class as a string"""
+
+@dataclass(kw_only=True)
 class Request(Item):
-    def __init__(self, name, type, threshold: float) -> None:
-        super().__init__(name, type)
-        self.threshold = threshold
+    threshold: float
+    _threshold: float = field(init=False, repr=False)
 
-    def get_threshold(self):
-        return self.threshold
+    @property
+    def threshold(self) -> float:
+        return self._threshold
 
-    def set_threshold(self, threshold: float):
-        self.threshold = threshold
-    def dump(self):
-        return {key:value for key, value in self.__dict__.items() if not key.startswith('__') and not callable(value)}
+    @threshold.setter
+    def threshold(self, threshold: float) -> None:
+        self._threshold = threshold
+    def verbose_query_type(self) -> str:
+        return QueryType.REQUESTS.value
 
 
-
+@dataclass(kw_only=True)
 class Result(Item):
-    def __init__(self, name, type, price: float, sent: bool, url) -> None:
-        super().__init__(name, type)
-        self.price = price
-        self.sent = sent
-        self.url = url
+    price: float
+    _price: float = field(init=False, repr=False)
+    sent: bool = False
+    _sent: bool = field(init=False, repr=False, default_factory=bool)
+    url: str
+    _url: str = field(init=False, repr=False)
 
-    def get_price(self):
-        return self.price
+    @property
+    def price(self) -> float:
+        return self._price
 
-    def get_sent(self):
-        return self.sent
+    @price.setter
+    def price(self, price: float) -> None:
+        self._price = price
 
-    def get_url(self):
-        return self.url
+    @property
+    def sent(self) -> bool:
+        return self._sent
 
-    def set_price(self, price: float):
-        self.price = price
+    @sent.setter
+    def sent(self, sent: bool) -> None:
+        self._sent = sent
 
-    def set_sent(self, sent: bool):
-        self.sent = sent
+    @property
+    def url(self) -> str:
+        return self._url
 
-    def set_url(self, url: float):
-        self.url = url
-
-    def create_link():
-        pass
-
+    @url.setter
+    def url(self, value: str) -> None:
+        self._url = value
+    def create_message(self):
+        return Message(msg= f"Preisdrop für *{self.name}*\nGefundener Preis: {self.price}€\n\nDu findest das Angebot hier:\n{self.url}")
+    def verbose_query_type(self) -> str:
+        return QueryType.RESULTS.value

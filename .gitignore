@@ -9,6 +9,9 @@ __pycache__/
 /data/*.json
 /data/chat_ids.*
 
+*.rar
+*.bat
+
 # Distribution / packaging
 .Python
 build/

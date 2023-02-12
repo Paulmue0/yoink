@@ -15,14 +15,15 @@ import math
 
 
 class Scraper:
-    def __init__(self, store: Storage, store_chief:StorageChief) -> None:
+    def __init__(self, store: Storage, store_chief:StorageChief):
         self.store = store
         self.store_chief = store_chief
         self.driver = webdriver.Chrome(
             service=Service(ChromeDriverManager().install()))
 
     def get_price(self, product: Request) -> float:
-        self.navigate_to_url(self.search_query(product))
+        if self.navigate_to_url(self.search_query(product)) is False:
+            return None
         price_euros = self.get_element_by_xpath(
             '/html/body/div[1]/div[1]/div[3]/div[2]/div[2]/div[2]/div[1]/div/div[2]/div[2]/div[1]/div/span/span[1]')
         price_cents = self.get_element_by_xpath(
@@ -36,7 +37,8 @@ class Scraper:
         return price
 
     def get_cheapest_offer_url(self, product: Item) -> str:
-        self.navigate_to_url(self.search_query(product))
+        if self.navigate_to_url(self.search_query(product)) is False:
+            return None
         cheapest_url = self.get_element_by_xpath(
             '/html/body/div[1]/div[1]/div[3]/div[2]/div[2]/div[2]/div[1]/div/div[2]/div[1]/div[3]/div/div[1]/div[2]')
 
@@ -45,7 +47,8 @@ class Scraper:
 
         link = f"https://www.preissuchmaschine.de{cheapest_url.get_attribute('href')}"
 
-        self.navigate_to_url(link)
+        if self.navigate_to_url(link) is False:
+            return None
         self.wait_for_url_change(link, 10)
 
         url = self.driver.current_url
@@ -56,7 +59,10 @@ class Scraper:
         return (f'https://www.preissuchmaschine.de/Katalog/Suche/{query_name}.html')
 
     def navigate_to_url(self, url: str) -> None:
-        self.driver.get(url)
+        try:
+            self.driver.get(url)
+        except:
+            return False 
 
     def get_element_by_xpath(self, xpath: str):
         try:
@@ -69,7 +75,7 @@ class Scraper:
             return None
         return element
 
-    def wait_for_url_change(self, url: str, seconds: int):
+    def wait_for_url_change(self, url: str, seconds: int) -> bool:
         try:
             result = WebDriverWait(self.driver, seconds).until(EC.url_changes(url))
         except:
@@ -90,11 +96,11 @@ class Scraper:
             self.navigate_to_url(self.search_query(requested_product))
 
             queried_product = Result(name=requested_product['name'], type=Condition.NEW, price=self.get_price(
-                requested_product), url=self.get_cheapest_offer_url(requested_product))
+                requested_product), sent=False, url=self.get_cheapest_offer_url(requested_product))
 
             if queried_product.price is not None:
                 self.store_chief.add_incoming_request(queried_product)
-
-            self.driver.quit()
+            time.sleep(5)
+        self.driver.quit()
 
         # Perform scraping for USED products

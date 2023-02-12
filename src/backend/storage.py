@@ -28,7 +28,7 @@ class Storage:
                 f"get_dataError: RequestResult value '{query_type.value}' not found in the store.")
             return None
 
-    def find_item_by_name(self, name: Item, search_space: list[QueryType, Condition]) -> Item:
+    def find_item_by_name(self, name: str, search_space: list[QueryType, Condition]) -> Item:
         try:
             result = [d for d in self.store[search_space[0].value]
                       [search_space[1]] if d["name"] == name][0]
@@ -39,7 +39,7 @@ class Storage:
             # print(f"FindError: Item with type '{item.type}' not found in the store for search_space value '{search_space}'.")
             return None
 
-    def add(self, item: Item):
+    def add(self, item: Item) -> None:
         index = self.indexOf(item)
         if index is None:
             try:
@@ -50,7 +50,7 @@ class Storage:
         else:
             raise ValueError("AddError: Item already exists in the store.")
 
-    def update(self, old_item: Item, new_item: Item):
+    def update(self, old_item: Item, new_item: Item) -> None:
         if self.is_in_storage(old_item) and not self.is_in_storage(new_item):
             try:
                 self.remove(old_item)
@@ -72,7 +72,7 @@ class Storage:
             print(
                 f"RemoveError: Item with name '{item.name}' not found in the store for RequestResult value '{item.query_type()}'.")
 
-    def indexOf(self, item: Item):
+    def indexOf(self, item: Item) -> int:
         try:
             if item.query_type(verbose=False) == QueryType.REQUESTS:
                 return next((index for (index, d) in enumerate(self.store[item.query_type()][item.type])

@@ -18,7 +18,7 @@ class StorageChief:
             self.store.update(old_result, result)
         else:
             self.store.add(result)
-    def messages_sent(self, type:Condition=Condition.NEW) -> None:
+    def messages_sent(self, chat_id, type:Condition=Condition.NEW) -> None:
         results = self.store.get_data(QueryType.RESULTS)
         #New items
         products = results[type.value]
@@ -28,7 +28,7 @@ class StorageChief:
             updated_product.sent = True
             self.store.update(legacy_product, updated_product)
         if type is Condition.NEW:
-            self.messages_sent(Condition.OLD)
+            self.messages_sent(chat_id, Condition.OLD)
 
 
         

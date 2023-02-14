@@ -1,6 +1,5 @@
 from dataclasses import dataclass
-@dataclass(kw_only=True)
-
+@dataclass
 class Message:
     msg:str
     

@@ -75,7 +75,7 @@ class YoinkBot:
 
         # on different commands - answer in Telegram
         self.application.add_handler(CommandHandler(["start", "help"], self.start))
-        self.application.add_handler(CommandHandler("unset", self.stop))
+        # self.application.add_handler(CommandHandler("unset", self.stop))
 
         try:
 

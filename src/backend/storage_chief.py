@@ -9,7 +9,7 @@ class StorageChief:
         associated_request = self.store.find_item_by_name(result.name, [QueryType.REQUESTS, result.type])
         if result.price is None:
             return
-        if associated_request.threshold <= result.price:
+        if associated_request.threshold < result.price:
             return
         if self.store.is_in_storage(result):
             old_result:Result = self.store.find_item_by_name(result.name, [QueryType.RESULTS, result.type])

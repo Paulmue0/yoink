@@ -11,6 +11,7 @@ from message import Message
 from dataclasses import dataclass
 from controller import Controller
 
+
 class YoinkBot:
     def __init__(self) -> None:
         load_dotenv()
@@ -18,7 +19,8 @@ class YoinkBot:
         self.application = Application.builder().token(self.TOKEN).build()
 
         # on different commands - answer in Telegram
-        self.application.add_handler(CommandHandler(["start", "help"], self.start))
+        self.application.add_handler(
+            CommandHandler(["start", "help"], self.start))
         # self.application.add_handler(CommandHandler("unset", self.stop))
 
         try:
@@ -84,9 +86,8 @@ class YoinkBot:
                     chat_id, text=msg.msg)
             contr.after_sent(chat_id)
 
-
     def remove_job_if_exists(
-        self, name: str, context: ContextTypes.DEFAULT_TYPE) -> bool:
+            self, name: str, context: ContextTypes.DEFAULT_TYPE) -> bool:
         """Remove job with given name. Returns whether job was removed."""
 
         current_jobs = context.job_queue.get_jobs_by_name(name)
@@ -102,16 +103,14 @@ class YoinkBot:
         """Add a job to the queue."""
 
         # try:
-            # args[0] should contain the time for the timer in seconds
+        # args[0] should contain the time for the timer in seconds
         # interval = 60
         interval = 60*60*3
-
 
         self.application.job_queue.run_repeating(
             self.alarm, interval, first=5)
 
-
-            # job_removed = self.remove_job_if_exists(str(chat_id), context)
+        # job_removed = self.remove_job_if_exists(str(chat_id), context)
         #     text = "Timer successfully set!"
         #     if job_removed:
         #         text += " Old one was removed."

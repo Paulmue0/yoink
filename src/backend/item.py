@@ -3,13 +3,13 @@ from dataclasses import dataclass, field, asdict
 from enums import Condition, QueryType
 from message import Message
 
+
 @dataclass()
 class Item(ABC):
     name: str
     _name: str = field(init=False, repr=False)
     type: Condition
     _type: Condition = field(init=False, repr=False)
-
 
     @property
     def name(self) -> str:
@@ -33,10 +33,11 @@ class Item(ABC):
     def dump(self) -> dict:
         vars = asdict(self)
         return self.exclude_private(vars)
-    
+
     @abstractmethod
-    def query_type(self, verbose:bool=True) -> str | QueryType:
+    def query_type(self, verbose: bool = True) -> str | QueryType:
         """returns the querytiype of the class as a string"""
+
 
 @dataclass()
 class Request(Item):
@@ -50,10 +51,12 @@ class Request(Item):
     @threshold.setter
     def threshold(self, threshold: float) -> None:
         self._threshold = threshold
-    def query_type(self, verbose:bool = True) -> str | QueryType:
+
+    def query_type(self, verbose: bool = True) -> str | QueryType:
         if verbose:
             return QueryType.REQUESTS.value
         return QueryType.REQUESTS
+
 
 @dataclass()
 class Result(Item):
@@ -87,13 +90,17 @@ class Result(Item):
     @url.setter
     def url(self, value: str) -> None:
         self._url = value
+
     def create_message(self):
         return f"Preisdrop für \"{self.name}\"\nGefundener Preis: {self.price}€\n\nDu findest das Angebot hier:\n{self.url}"
-    def query_type(self, verbose:bool = True) -> str | QueryType:
+
+    def query_type(self, verbose: bool = True) -> str | QueryType:
         if verbose:
             return QueryType.RESULTS.value
         return QueryType.RESULTS
-def create_item_from_dict(obj:dict, properties:list[QueryType, Condition]) -> Item:
+
+
+def create_item_from_dict(obj: dict, properties: list[QueryType, Condition]) -> Item:
     if properties[0] == QueryType.REQUESTS:
         return Request(name=obj['name'], type=properties[1], threshold=obj['threshold'])
     if properties[0] == QueryType.RESULTS:

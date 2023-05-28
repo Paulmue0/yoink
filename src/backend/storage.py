@@ -41,36 +41,35 @@ class Storage:
 
     def add(self, item: Item) -> None:
         index = self.indexOf(item)
-        if index is None:
-            try:
-                self.store[item.query_type()][item.type].append(item.dump())
-            except KeyError:
-                print(
-                    f"AddError: Item type '{item.type}' not found in the store for RequestResult value '{item.query_type()}'.")
-        else:
+        if index is not None:
             raise ValueError("AddError: Item already exists in the store.")
 
+        try:
+            self.store[item.query_type()][item.type].append(item.dump())
+        except KeyError:
+            print(
+                f"AddError: Item type '{item.type}' not found in the store for RequestResult value '{item.query_type()}'.")
+
     def update(self, old_item: Item, new_item: Item) -> None:
-        if self.is_in_storage(old_item) and not self.is_in_storage(new_item):
-            try:
-                self.remove(old_item)
-                self.add(new_item)
-            except KeyError:
-                print(
-                    f"UpdateError: Item type '{old_item.type}' not found in the store for RequestResult value '{old_item.query_type()}'.")
-        else:
-            print(f"UpdateError: The item to be updated is not in the store.")
+        if not (self.is_in_storage(old_item) and not self.is_in_storage(new_item)):
+            return
+        try:
+            self.remove(old_item)
+            self.add(new_item)
+        except KeyError:
+            print(
+                f"UpdateError: Item type '{old_item.type}' not found in the store for RequestResult value '{old_item.query_type()}'.")
 
     def remove(self, item: Item):
-        if self.is_in_storage(item):
-            try:
-                self.store[item.query_type()][item.type].remove(item.dump())
-            except KeyError:
-                print(
-                    f"RemoveError: Item type '{item.type}' not found in the store for RequestResult value '{item.query_type()}'.")
-        else:
+        if not self.is_in_storage(item):
             print(
                 f"RemoveError: Item with name '{item.name}' not found in the store for RequestResult value '{item.query_type()}'.")
+            return
+        try:
+            self.store[item.query_type()][item.type].remove(item.dump())
+        except KeyError:
+            print(
+                f"RemoveError: Item type '{item.type}' not found in the store for RequestResult value '{item.query_type()}'.")
 
     def indexOf(self, item: Item) -> int:
         try:

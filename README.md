@@ -45,7 +45,7 @@ Now that we have our service we need to activate it:
 
 ```
 sudo chmod 644 /lib/systemd/system/yoink.service
-chmod +x /home/username/yoink.py
+chmod +x /home/username/yoink/src/backend/botservice.py
 sudo systemctl daemon-reload
 sudo systemctl enable yoink.service
 sudo systemctl start yoink.service

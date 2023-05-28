@@ -35,7 +35,7 @@ class Item(ABC):
         return self.exclude_private(vars)
 
     @abstractmethod
-    def query_type(self, verbose: bool = True) -> str | QueryType:
+    def query_type(self, verbose: bool = True):
         """returns the querytiype of the class as a string"""
 
 
@@ -52,7 +52,7 @@ class Request(Item):
     def threshold(self, threshold: float) -> None:
         self._threshold = threshold
 
-    def query_type(self, verbose: bool = True) -> str | QueryType:
+    def query_type(self, verbose: bool = True):
         if verbose:
             return QueryType.REQUESTS.value
         return QueryType.REQUESTS
@@ -94,7 +94,7 @@ class Result(Item):
     def create_message(self):
         return f"Preisdrop für \"{self.name}\"\nGefundener Preis: {self.price}€\n\nDu findest das Angebot hier:\n{self.url}"
 
-    def query_type(self, verbose: bool = True) -> str | QueryType:
+    def query_type(self, verbose: bool = True):
         if verbose:
             return QueryType.RESULTS.value
         return QueryType.RESULTS

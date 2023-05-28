@@ -36,3 +36,16 @@ class StorageChief:
             self.store.update(legacy_product, updated_product)
         if type is Condition.NEW:
             self.messages_sent(chat_id, Condition.OLD)
+
+    def list_items(self):
+        """ returns a list of strings summarizing all tracked items"""
+        requests = self.store.get_data(QueryType.REQUESTS)
+        summary = []
+        for request in requests['NEW']:
+            actual_price = "no price found yet"
+            result : Result = self.store.find_item_by_name(
+                request['name'], [QueryType.RESULTS, Condition.NEW.value])
+            if result:
+                actual_price = str(result.price)
+            summary.append(f"Name: {request['name']} | Threshold: {request['threshold']} | Price: {actual_price}")
+        return summary

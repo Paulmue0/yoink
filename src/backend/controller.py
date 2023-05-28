@@ -29,3 +29,6 @@ class Controller:
 
     def pass_chat_ids(self) -> list[str]:
         pass
+
+    def pass_list_items(self):
+        return self.chief.list_items()

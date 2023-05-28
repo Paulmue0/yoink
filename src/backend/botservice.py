@@ -17,10 +17,13 @@ class YoinkBot:
         load_dotenv()
         self.TOKEN = os.getenv("API_KEY")
         self.application = Application.builder().token(self.TOKEN).build()
+        self.contr = Controller()
 
         # on different commands - answer in Telegram
         self.application.add_handler(
             CommandHandler(["start", "help"], self.start))
+        self.application.add_handler(
+            CommandHandler(["list"], self.list))
         # self.application.add_handler(CommandHandler("unset", self.stop))
 
         try:
@@ -56,6 +59,16 @@ class YoinkBot:
         await update.message.reply_text("Use /stop to stop my service (aber noch nicht jetzt das funktioniert nämlich noch nicht)")
         self.save_chat_id(update.effective_chat.id)
 
+    async def list(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+
+        """Sends items that are tracked"""
+        messenges = self.contr.pass_list_items()
+        for msg in messenges:
+            await context.bot.send_message(
+                chat_id=update.effective_chat.id, text=msg
+            )
+
+
     def save_chat_id(self, id) -> None:
         if not os.path.exists("./data/chat_ids.txt"):
             with open("./data/chat_ids.txt", "w") as f:
@@ -68,7 +81,7 @@ class YoinkBot:
                 with open("./data/chat_ids.txt", "a") as f:
                     f.write(str(id) + "\n")
 
-    def get_chat_ids(self) -> list[str]:
+    def get_chat_ids(self):
         if os.path.exists("./data/chat_ids.txt"):
             with open("./data/chat_ids.txt", "r") as f:
                 chat_ids = f.read().splitlines()
@@ -78,13 +91,12 @@ class YoinkBot:
 
     async def alarm(self, context: ContextTypes.DEFAULT_TYPE) -> None:
         """Send the price-alarm message."""
-        contr = Controller()
-        contr.run()
+        self.contr.run()
         for chat_id in self.get_chat_ids():
-            for msg in contr.pass_messages(chat_id):
+            for msg in self.contr.pass_messages(chat_id):
                 await context.bot.send_message(
                     chat_id, text=msg.msg)
-            contr.after_sent(chat_id)
+            self.contr.after_sent(chat_id)
 
     def remove_job_if_exists(
             self, name: str, context: ContextTypes.DEFAULT_TYPE) -> bool:

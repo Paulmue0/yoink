@@ -30,14 +30,16 @@ class Storage:
 
     def find_item_by_name(self, name: str, search_space: list[QueryType, Condition]) -> Item:
         try:
-            result = [d for d in self.store[search_space[0].value]
-                      [search_space[1]] if d["name"] == name][0]
-            return create_item_from_dict(result, [search_space[0], Condition(search_space[1])])
+            results = [d for d in self.store[search_space[0].value]
+                      [search_space[1]] if d["name"] == name]
+            if not results:
+                return None
+            return create_item_from_dict(results[0], [search_space[0], Condition(search_space[1])])
         except KeyError:
             print(traceback.format_exc())
             print(KeyError.with_traceback)
             # print(f"FindError: Item with type '{item.type}' not found in the store for search_space value '{search_space}'.")
-            return None
+            return None 
 
     def add(self, item: Item) -> None:
         index = self.indexOf(item)

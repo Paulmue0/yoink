@@ -3,7 +3,7 @@ from dataclasses import dataclass, field, asdict
 from enums import Condition, QueryType
 from message import Message
 
-@dataclass(kw_only=True)
+@dataclass()
 class Item(ABC):
     name: str
     _name: str = field(init=False, repr=False)
@@ -38,7 +38,7 @@ class Item(ABC):
     def query_type(self, verbose:bool=True) -> str | QueryType:
         """returns the querytiype of the class as a string"""
 
-@dataclass(kw_only=True)
+@dataclass()
 class Request(Item):
     threshold: float
     _threshold: float = field(init=False, repr=False)
@@ -55,7 +55,7 @@ class Request(Item):
             return QueryType.REQUESTS.value
         return QueryType.REQUESTS
 
-@dataclass(kw_only=True)
+@dataclass()
 class Result(Item):
     price: float
     _price: float = field(init=False, repr=False)

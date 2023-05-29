@@ -43,9 +43,11 @@ class StorageChief:
         summary = []
         for request in requests['NEW']:
             actual_price = "no price found yet"
+            url = ""
             result : Result = self.store.find_item_by_name(
                 request['name'], [QueryType.RESULTS, Condition.NEW.value])
             if result:
                 actual_price = str(result.price)
-            summary.append(f"Name: {request['name']} | Threshold: {request['threshold']} | Price: {actual_price}")
+                url = str(result.url)
+            summary.append(f"Name: {request['name']} \n\nThreshold: {request['threshold']} \nPrice: {actual_price} \n{url}")
         return summary

@@ -141,33 +141,11 @@ class YoinkBot:
 
     def set_timer(self) -> None:
         """Add a job to the queue."""
-
-        # try:
-        # args[0] should contain the time for the timer in seconds
-        # interval = 60
+       
         interval = 60*60*3
 
-        # self.application.job_queue.run_repeating(
-        #     self.alarm, interval, first=5)
-
-        # job_removed = self.remove_job_if_exists(str(chat_id), context)
-        #     text = "Timer successfully set!"
-        #     if job_removed:
-        #         text += " Old one was removed."
-        #     await update.effective_message.reply_text(text)
-        # except (IndexError, ValueError):
-        #     await update.effective_message.reply_text("Usage: /set <seconds>")
-
-    # async def stop(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    #     """Remove the job if the user changed their mind."""
-    #     chat_id = update.message.chat_id
-    #     job_removed = self.remove_job_if_exists(str(chat_id), context)
-    #     text = (
-    #         "Timer successfully cancelled!"
-    #         if job_removed
-    #         else "You have no active timer."
-    #     )
-    #     await update.message.reply_text(text)
+        self.application.job_queue.run_repeating(
+            self.alarm, interval, first=5)
 
     def run(self) -> None:
         """Run bot."""

@@ -43,6 +43,7 @@ class Item(ABC):
 class Request(Item):
     threshold: float
     _threshold: float = field(init=False, repr=False)
+    price_history: list = field(default_factory=list) 
 
     @property
     def threshold(self) -> float:
@@ -102,6 +103,6 @@ class Result(Item):
 
 def create_item_from_dict(obj: dict, properties: list[QueryType, Condition]) -> Item:
     if properties[0] == QueryType.REQUESTS:
-        return Request(name=obj['name'], type=properties[1], threshold=obj['threshold'])
+        return Request(name=obj['name'], type=properties[1], threshold=obj['threshold'], price_history= obj['price_history'])
     if properties[0] == QueryType.RESULTS:
         return Result(name=obj['name'], type=properties[1], price=obj['price'], sent=(obj['sent']), url=obj['url'])

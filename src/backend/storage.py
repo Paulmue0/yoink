@@ -1,3 +1,4 @@
+from datetime import datetime
 import json
 
 from item import Item, create_item_from_dict
@@ -72,6 +73,23 @@ class Storage:
         except KeyError:
             print(
                 f"RemoveError: Item type '{item.type}' not found in the store for RequestResult value '{item.query_type()}'.")
+
+    def add_price_history(self, item_name: str, query_type: QueryType, price: float):
+        try:
+            items = self.store[query_type.value][Condition.NEW.value] + self.store[query_type.value][Condition.OLD.value]
+            for item in items:
+                if item["name"] == item_name:
+                    if "price_history" not in item:
+                        item["price_history"] = []
+                    item["price_history"].append({
+                        "timestamp": str(datetime.now().replace(microsecond=0)),
+                        "price": price
+                    })
+                    break
+        except KeyError:
+            print(
+                f"AddPriceHistoryError: QueryType value '{query_type.value}' or Condition value '{Condition.NEW.value}' or '{Condition.OLD.value}' not found in the store.")
+
 
     def indexOf(self, item: Item) -> int:
         try:

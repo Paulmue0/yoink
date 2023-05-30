@@ -32,3 +32,6 @@ class Controller:
 
     def pass_list_items(self):
         return self.chief.list_items()
+
+    def pass_item_price_history(self, item_name: str):
+        return self.chief.list_price_history(item_name=item_name)

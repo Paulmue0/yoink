@@ -3,13 +3,14 @@ from telegram import *
 from telegram.ext import *
 import logging
 from telegram import Update
-from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler
+from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, MessageHandler
 from telegram import __version__ as TG_VER
 from dotenv import load_dotenv
 import os
 from message import Message
 from dataclasses import dataclass
 from controller import Controller
+import re
 
 
 class YoinkBot:
@@ -19,11 +20,15 @@ class YoinkBot:
         self.application = Application.builder().token(self.TOKEN).build()
         self.contr = Controller()
 
+        self.application.add_handler(MessageHandler(filters.Regex(r'^(/history_*.+)$'), self.history))
+
         # on different commands - answer in Telegram
         self.application.add_handler(
             CommandHandler(["start", "help"], self.start))
         self.application.add_handler(
             CommandHandler(["list"], self.list))
+        self.application.add_handler(
+            CommandHandler(["history"], self.history))
         # self.application.add_handler(CommandHandler("unset", self.stop))
 
         try:
@@ -45,7 +50,7 @@ class YoinkBot:
         logging.basicConfig(
             format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
             level=logging.INFO,)
-
+        
     async def start(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
         """Sends explanation on how to use the bot."""
@@ -62,11 +67,25 @@ class YoinkBot:
     async def list(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
         """Sends items that are tracked"""
-        messenges = self.contr.pass_list_items()
-        for msg in messenges:
+        messages = self.contr.pass_list_items()
+        for msg in messages:
+            msg += "\n\nCheckout the price history:\n" + self.create_history_reply_interface(message=msg)
             await context.bot.send_message(
                 chat_id=update.effective_chat.id, text=msg
             )
+
+    async def history(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        """Sends history of an item"""
+        item_name = update.message.text.replace('/history_', '')
+        item_name = item_name.replace("_", " ")
+        message = self.contr.pass_item_price_history(item_name=item_name)
+        await context.bot.send_message(
+            chat_id=update.effective_chat.id, text=message
+        )
+
+    async def info(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        id = update.message.text.replace('/info_', '')
+        await update.message.reply_text(id, parse_mode='Markdown')
 
 
     def save_chat_id(self, id) -> None:
@@ -88,6 +107,15 @@ class YoinkBot:
         else:
             raise FileNotFoundError
         return chat_ids
+    
+    def create_history_reply_interface(self, message: str) -> str:
+        name_match = re.search(r"Name:\s*(.+)", message)
+        if name_match:
+            name = name_match.group(1)
+            name = name.replace(" ", "_")
+            return f"/history_{name}"
+        else:
+            return ""
 
     async def alarm(self, context: ContextTypes.DEFAULT_TYPE) -> None:
         """Send the price-alarm message."""
@@ -119,8 +147,8 @@ class YoinkBot:
         # interval = 60
         interval = 60*60*3
 
-        self.application.job_queue.run_repeating(
-            self.alarm, interval, first=5)
+        # self.application.job_queue.run_repeating(
+        #     self.alarm, interval, first=5)
 
         # job_removed = self.remove_job_if_exists(str(chat_id), context)
         #     text = "Timer successfully set!"

@@ -38,11 +38,14 @@ class WebScraper:
         items = self.store.get_data(QueryType.REQUESTS)
         # New Items
         for requested_product in items[Condition.NEW.value]:
-            search_query = self.construct_query(requested_product['name'])
+            name = requested_product['name']
+            search_query = self.construct_query(name)
+            price = self.get_price(
+                search_query)
 
-            queried_product = Result(name=requested_product['name'], type=Condition.NEW, price=self.get_price(
-                search_query), sent=False, url=search_query)
+            queried_product = Result(name=name, type=Condition.NEW, price=price, sent=False, url=search_query)
 
             if queried_product.price is not None:
-                self.chief.add_incoming_request(queried_product)
+                self.chief.add_incoming_result(queried_product)
+                self.chief.add_to_price_history(name, price)
             time.sleep(5)
